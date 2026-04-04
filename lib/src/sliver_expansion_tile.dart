@@ -578,6 +578,51 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
     return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
+  Widget _buildSliverBody(BuildContext context, Animation<double> animation) {
+    final body = SliverList(delegate: _childrenDelegate);
+    final padding =
+        widget.childrenPadding ?? _expansionTileTheme.childrenPadding;
+    if (padding != null) {
+      return SliverPadding(padding: padding, sliver: body);
+    }
+    return body;
+  }
+
+  // ExpansionTile-like box reveal for eager `children`.
+  Widget _buildBody(BuildContext context, Animation<double> animation) {
+    final CurvedAnimation heightFactor = CurvedAnimation(
+      parent: animation,
+      curve: _curve,
+      reverseCurve: _reverseCurve,
+    );
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return ClipRect(
+          child: Align(heightFactor: heightFactor.value, child: child),
+        );
+      },
+      child: Align(
+        alignment:
+            widget.expandedAlignment ??
+            _expansionTileTheme.expandedAlignment ??
+            Alignment.center,
+        child: Padding(
+          padding:
+              widget.childrenPadding ??
+              _expansionTileTheme.childrenPadding ??
+              EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment:
+                widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+            children: widget.children,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -825,7 +870,7 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         defaultHeight;
   }
 
-  Widget _buildExpansible(
+  Widget _buildSliverExpansible(
     BuildContext context,
     Widget header,
     Widget body,
@@ -897,8 +942,8 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         reverseCurve: _reverseCurve,
       ),
       maintainState: widget.maintainState,
-      expansibleBuilder: _buildExpansible,
-      headerBuilder: (context, animation) {
+
+      sliverHeaderBuilder: (context, animation) {
         final bool isDense = _isDenseLayout(theme, listTileTheme);
         final VisualDensity effectiveVisualDensity =
             widget.visualDensity ??
@@ -929,60 +974,15 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
           ),
         );
       },
-      bodyBuilder: (context, animation) {
+      sliverBodyBuilder: (context, animation) {
         // Lazy sliver body for `.builder`.
         if (widget.itemBuilder != null) {
-          final body = SliverList(delegate: _childrenDelegate);
-          final padding =
-              widget.childrenPadding ?? _expansionTileTheme.childrenPadding;
-          if (padding != null) {
-            return SliverPadding(padding: padding, sliver: body);
-          }
-          return body;
+          return _buildSliverBody(context, animation);
         }
 
-        // Flutter-like box reveal for eager `children`.
-        final CurvedAnimation heightFactor = CurvedAnimation(
-          parent: animation,
-          curve: _curve,
-          reverseCurve: _reverseCurve,
-        );
-
-        final EdgeInsetsGeometry resolvedChildrenPadding =
-            widget.childrenPadding ??
-            _expansionTileTheme.childrenPadding ??
-            EdgeInsets.zero;
-
-        final AlignmentGeometry alignment =
-            widget.expandedAlignment ??
-            _expansionTileTheme.expandedAlignment ??
-            Alignment.center;
-        final CrossAxisAlignment crossAxisAlignment =
-            widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center;
-
-        final Widget result = Align(
-          alignment: alignment,
-          child: Padding(
-            padding: resolvedChildrenPadding,
-            child: Column(
-              crossAxisAlignment: crossAxisAlignment,
-              children: widget.children,
-            ),
-          ),
-        );
-
-        return SliverToBoxAdapter(
-          child: AnimatedBuilder(
-            animation: animation,
-            child: result,
-            builder: (context, child) {
-              return ClipRect(
-                child: Align(heightFactor: heightFactor.value, child: child),
-              );
-            },
-          ),
-        );
+        return SliverToBoxAdapter(child: _buildBody(context, animation));
       },
+      sliverExpansibleBuilder: _buildSliverExpansible,
     );
   }
 }

@@ -18,8 +18,8 @@ const Curve _kDefaultCurve = Curves.ease;
 ///
 /// See also:
 ///
-///  * [SliverExpansible.headerBuilder], which is of this type.
-///  * [SliverExpansible.bodyBuilder], which is also of this type.
+///  * [SliverExpansible.sliverHeaderBuilder], which is of this type.
+///  * [SliverExpansible.sliverBodyBuilder], which is also of this type.
 typedef SliverExpansibleComponentBuilder =
     Widget Function(BuildContext context, Animation<double> animation);
 
@@ -27,9 +27,9 @@ typedef SliverExpansibleComponentBuilder =
 /// [SliverExpansible] widget to build the sliver.
 ///
 /// The `header` property is the header returned by
-/// [SliverExpansible.headerBuilder].
+/// [SliverExpansible.sliverHeaderBuilder].
 ///
-/// The `body` property is the body returned by [SliverExpansible.bodyBuilder]
+/// The `body` property is the body returned by [SliverExpansible.sliverBodyBuilder]
 /// optionally wrapped in an internal sliver that expands and collapses it,
 /// depending on [SliverExpansible.bodyRevealMode].
 ///
@@ -43,7 +43,7 @@ typedef SliverExpansibleComponentBuilder =
 ///
 /// See also:
 ///
-///  * [SliverExpansible.expansibleBuilder], which is of this type.
+///  * [SliverExpansible.sliverExpansibleBuilder], which is of this type.
 typedef SliverExpansibleBuilder =
     Widget Function(
       BuildContext context,
@@ -61,7 +61,7 @@ enum SliverExpansibleBodyRevealMode {
   /// are built).
   sliverClipReveal,
 
-  /// Leaves the body sliver as built by [SliverExpansible.bodyBuilder].
+  /// Leaves the body sliver as built by [SliverExpansible.sliverBodyBuilder].
   ///
   /// In this mode, the [SliverExpansible] does not apply any reveal/collapse
   /// wrapper. The builder is responsible for revealing the content.
@@ -215,8 +215,8 @@ class SliverExpansibleController extends ChangeNotifier {
 /// [SliverExpansible] to save and restore its expanded state when it is
 /// scrolled in and out of view.
 ///
-/// Provide [headerBuilder] and [bodyBuilder] callbacks to build the header and
-/// body slivers. An additional [expansibleBuilder] callback can be provided to
+/// Provide [sliverHeaderBuilder] and [sliverBodyBuilder] callbacks to build the header and
+/// body slivers. An additional [sliverExpansibleBuilder] callback can be provided to
 /// further customize the layout of the sliver.
 ///
 /// The [SliverExpansible] does not inherently toggle the expansion state. To
@@ -230,11 +230,11 @@ class SliverExpansibleController extends ChangeNotifier {
 class SliverExpansible extends StatefulWidget {
   /// Creates an instance of [SliverExpansible].
   const SliverExpansible({
-    required this.headerBuilder,
-    required this.bodyBuilder,
+    required this.sliverHeaderBuilder,
+    required this.sliverBodyBuilder,
     required this.controller,
     super.key,
-    this.expansibleBuilder = _defaultExpansibleBuilder,
+    this.sliverExpansibleBuilder = _defaultExpansibleBuilder,
     this.animationStyle,
     this.bodyRevealMode = SliverExpansibleBodyRevealMode.sliverClipReveal,
     this.maintainState = true,
@@ -246,10 +246,10 @@ class SliverExpansible extends StatefulWidget {
   final SliverExpansibleController controller;
 
   /// Builds the always-displayed header sliver.
-  final SliverExpansibleComponentBuilder headerBuilder;
+  final SliverExpansibleComponentBuilder sliverHeaderBuilder;
 
   /// Builds the collapsible body sliver.
-  final SliverExpansibleComponentBuilder bodyBuilder;
+  final SliverExpansibleComponentBuilder sliverBodyBuilder;
 
   /// Controls how the body sliver is revealed when expanding/collapsing.
   ///
@@ -282,10 +282,10 @@ class SliverExpansible extends StatefulWidget {
   /// Defaults to true.
   final bool maintainState;
 
-  /// Builds the sliver with the results of [headerBuilder] and [bodyBuilder].
+  /// Builds the sliver with the results of [sliverHeaderBuilder] and [sliverBodyBuilder].
   ///
   /// Defaults to placing the header and body in a [SliverMainAxisGroup].
-  final SliverExpansibleBuilder expansibleBuilder;
+  final SliverExpansibleBuilder sliverExpansibleBuilder;
 
   static Widget _defaultExpansibleBuilder(
     BuildContext context,
@@ -418,13 +418,13 @@ class _SliverExpansibleState extends State<SliverExpansible>
     final Widget result = switch (widget.bodyRevealMode) {
       .sliverClipReveal => TickerMode(
         enabled: !closed,
-        child: widget.bodyBuilder(context, _animationController),
+        child: widget.sliverBodyBuilder(context, _animationController),
       ),
       .builderControlled => SliverOffstage(
         offstage: closed,
         sliver: TickerMode(
           enabled: !closed,
-          child: widget.bodyBuilder(context, _animationController),
+          child: widget.sliverBodyBuilder(context, _animationController),
         ),
       ),
     };
@@ -432,7 +432,10 @@ class _SliverExpansibleState extends State<SliverExpansible>
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (context, child) {
-        final header = widget.headerBuilder(context, _animationController);
+        final header = widget.sliverHeaderBuilder(
+          context,
+          _animationController,
+        );
         final factor = _mainAxisFactor;
 
         final Widget body = switch (widget.bodyRevealMode) {
@@ -444,7 +447,7 @@ class _SliverExpansibleState extends State<SliverExpansible>
             child ?? const SliverToBoxAdapter(child: SizedBox.shrink()),
           _ => const SliverToBoxAdapter(child: SizedBox.shrink()),
         };
-        return widget.expansibleBuilder(
+        return widget.sliverExpansibleBuilder(
           context,
           header,
           body,

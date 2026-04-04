@@ -16,7 +16,7 @@ Widget _buildGoldenHarness({
             SliverExpansible(
               controller: controller,
               animationStyle: animationStyle,
-              headerBuilder: (context, animation) {
+              sliverHeaderBuilder: (context, animation) {
                 return const SliverToBoxAdapter(
                   child: ColoredBox(
                     color: Colors.blue,
@@ -27,7 +27,7 @@ Widget _buildGoldenHarness({
                   ),
                 );
               },
-              bodyBuilder: (context, animation) {
+              sliverBodyBuilder: (context, animation) {
                 return const SliverToBoxAdapter(
                   child: ColoredBox(
                     color: Colors.green,

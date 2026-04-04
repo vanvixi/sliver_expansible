@@ -36,12 +36,12 @@ Widget _buildLayoutHarness({
             controller: controller,
             animationStyle: animationStyle,
             maintainState: true,
-            headerBuilder: (context, animation) {
+            sliverHeaderBuilder: (context, animation) {
               return SliverToBoxAdapter(
                 child: SizedBox(height: expansibleHeaderExtent),
               );
             },
-            bodyBuilder: (context, animation) => bodySliver,
+            sliverBodyBuilder: (context, animation) => bodySliver,
           ),
         ],
       ),
@@ -298,10 +298,10 @@ void main() {
                   curve: Curves.linear,
                 ),
                 maintainState: true,
-                headerBuilder: (context, animation) {
+                sliverHeaderBuilder: (context, animation) {
                   return const SliverToBoxAdapter(child: SizedBox(height: 50));
                 },
-                bodyBuilder: (context, animation) {
+                sliverBodyBuilder: (context, animation) {
                   return SliverToBoxAdapter(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
@@ -383,10 +383,10 @@ void main() {
                   duration: Duration(milliseconds: 50),
                   curve: Curves.linear,
                 ),
-                headerBuilder: (context, animation) {
+                sliverHeaderBuilder: (context, animation) {
                   return const SliverToBoxAdapter(child: Text('Outer header'));
                 },
-                bodyBuilder: (context, animation) {
+                sliverBodyBuilder: (context, animation) {
                   return SliverMainAxisGroup(
                     slivers: [
                       SliverExpansible(
@@ -395,12 +395,12 @@ void main() {
                           duration: Duration(milliseconds: 50),
                           curve: Curves.linear,
                         ),
-                        headerBuilder: (context, animation) {
+                        sliverHeaderBuilder: (context, animation) {
                           return const SliverToBoxAdapter(
                             child: Text('Inner header'),
                           );
                         },
-                        bodyBuilder: (context, animation) {
+                        sliverBodyBuilder: (context, animation) {
                           return const SliverToBoxAdapter(
                             child: Text('Inner body'),
                           );

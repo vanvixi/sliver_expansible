@@ -24,10 +24,10 @@ Widget _buildRestorationHarness({
                   duration: Duration(milliseconds: 50),
                   curve: Curves.linear,
                 ),
-                headerBuilder: (context, animation) {
+                sliverHeaderBuilder: (context, animation) {
                   return const SliverToBoxAdapter(child: SizedBox(height: 40));
                 },
-                bodyBuilder: (context, animation) {
+                sliverBodyBuilder: (context, animation) {
                   return const SliverToBoxAdapter(
                     child: SizedBox(height: 40, child: Text('Body content')),
                   );

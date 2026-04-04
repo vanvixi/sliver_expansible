@@ -46,11 +46,11 @@ Widget _buildScaffold({
               animationStyle: animationStyle,
               maintainState: maintainState,
               bodyRevealMode: bodyRevealMode,
-              headerBuilder:
+              sliverHeaderBuilder:
                   headerBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Header')),
-              bodyBuilder:
+              sliverBodyBuilder:
                   bodyBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Body')),
@@ -61,12 +61,12 @@ Widget _buildScaffold({
               animationStyle: animationStyle,
               maintainState: maintainState,
               bodyRevealMode: bodyRevealMode,
-              expansibleBuilder: expansibleBuilder,
-              headerBuilder:
+              sliverExpansibleBuilder: expansibleBuilder,
+              sliverHeaderBuilder:
                   headerBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Header')),
-              bodyBuilder:
+              sliverBodyBuilder:
                   bodyBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Body')),
@@ -317,10 +317,10 @@ void main() {
                   duration: Duration(seconds: 1),
                   curve: Curves.linear,
                 ),
-                headerBuilder: (context, animation) {
+                sliverHeaderBuilder: (context, animation) {
                   return const SliverToBoxAdapter(child: Text('Header'));
                 },
-                bodyBuilder: (context, animation) {
+                sliverBodyBuilder: (context, animation) {
                   return SliverList(
                     delegate: SliverChildListDelegate([
                       const SizedBox(height: 1000),
@@ -400,10 +400,10 @@ void main() {
               slivers: [
                 SliverExpansible(
                   controller: expected,
-                  headerBuilder: (context, animation) {
+                  sliverHeaderBuilder: (context, animation) {
                     return const SliverToBoxAdapter(child: Text('Header'));
                   },
-                  bodyBuilder: (context, animation) {
+                  sliverBodyBuilder: (context, animation) {
                     return SliverToBoxAdapter(
                       child: Builder(
                         builder: (context) {
@@ -461,11 +461,11 @@ void main() {
             slivers: [
               SliverExpansible(
                 controller: controller,
-                headerBuilder: (context, animation) =>
+                sliverHeaderBuilder: (context, animation) =>
                     const SliverToBoxAdapter(child: Text('Header')),
-                bodyBuilder: (context, animation) =>
+                sliverBodyBuilder: (context, animation) =>
                     const SliverToBoxAdapter(child: Text('Body')),
-                expansibleBuilder: (context, header, body, animation) {
+                sliverExpansibleBuilder: (context, header, body, animation) {
                   return SliverMainAxisGroup(
                     key: customKey,
                     slivers: [header, body],
