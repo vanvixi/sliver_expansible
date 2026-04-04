@@ -119,6 +119,87 @@ void main() {
   // Lazy build (builder)
   // -------------------------------------------------------------------------
 
+  testWidgets('eager children are built even when collapsed (maintainState=true)', (
+    tester,
+  ) async {
+    final controller = SliverExpansibleController();
+
+    await tester.pumpWidget(
+      _buildHarness(
+        slivers: [
+          SliverExpansionTile(
+            controller: controller,
+            maintainState: true,
+            title: const Text('Group'),
+            children: const [Text('Body')],
+          ),
+        ],
+      ),
+    );
+
+    final tileWidget = tester.widget<SliverExpansionTile>(
+      find.byType(SliverExpansionTile),
+    );
+    expect(tileWidget.itemBuilder, isNull);
+    expect(tileWidget.children, isNotEmpty);
+
+    final expansibleWidget = tester.widget<SliverExpansible>(
+      find.byType(SliverExpansible),
+    );
+    expect(expansibleWidget.maintainState, isTrue);
+    expect(
+      expansibleWidget.bodyRevealMode,
+      SliverExpansibleBodyRevealMode.builderControlled,
+    );
+
+    final group = tester.widget<SliverMainAxisGroup>(
+      find.byType(SliverMainAxisGroup),
+    );
+    expect(group.children[1], isA<SliverOffstage>());
+    final bodyOffstage = group.children[1] as SliverOffstage;
+    expect(bodyOffstage.offstage, isTrue);
+    expect(bodyOffstage.child, isA<TickerMode>());
+    expect((bodyOffstage.child! as TickerMode).child, isA<SliverToBoxAdapter>());
+
+    expect(find.text('Body', skipOffstage: false), findsOneWidget);
+
+    controller.expand();
+    await tester.pump();
+
+    final groupExpanded = tester.widget<SliverMainAxisGroup>(
+      find.byType(SliverMainAxisGroup),
+    );
+    expect(groupExpanded.children[1], isA<SliverOffstage>());
+    expect((groupExpanded.children[1] as SliverOffstage).offstage, isFalse);
+  });
+
+  testWidgets('builder children are not built while collapsed', (tester) async {
+    final controller = SliverExpansibleController();
+
+    await tester.pumpWidget(
+      _buildHarness(
+        slivers: [
+          SliverExpansionTile.builder(
+            controller: controller,
+            title: const Text('Group'),
+            itemCount: 1,
+            itemBuilder: (context, index) => const Text('Body'),
+          ),
+        ],
+      ),
+    );
+
+    final expansibleWidget = tester.widget<SliverExpansible>(
+      find.byType(SliverExpansible),
+    );
+    expect(
+      expansibleWidget.bodyRevealMode,
+      SliverExpansibleBodyRevealMode.sliverClipReveal,
+    );
+    expect(find.byType(SliverToBoxAdapter), findsNothing);
+    expect(find.text('Body', skipOffstage: false), findsNothing);
+  });
+
   testWidgets('collapsed is lazy — builder items not built', (tester) async {
     final controller = SliverExpansibleController();
     var buildCount = 0;
@@ -180,6 +261,42 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(buildCount, lessThan(400));
+  });
+
+  testWidgets('expandedAlignment and expandedCrossAxisAlignment apply to eager children only', (
+    tester,
+  ) async {
+    final controller = SliverExpansibleController()..expand();
+
+    await tester.pumpWidget(
+      _buildHarness(
+        slivers: [
+          SliverExpansionTile(
+            controller: controller,
+            title: const Text('Group'),
+            expandedAlignment: Alignment.centerLeft,
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            children: const [Text('Body')],
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final expandedAlign = tester.widget<Align>(
+      find.byWidgetPredicate(
+        (w) => w is Align && w.heightFactor == null && w.child is Padding,
+      ),
+    );
+    expect(expandedAlign.alignment, Alignment.centerLeft);
+
+    final expandedColumn = tester.widget<Column>(
+      find.descendant(
+        of: find.byType(SliverToBoxAdapter),
+        matching: find.byType(Column),
+      ),
+    );
+    expect(expandedColumn.crossAxisAlignment, CrossAxisAlignment.start);
   });
 
   // -------------------------------------------------------------------------

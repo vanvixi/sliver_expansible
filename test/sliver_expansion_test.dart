@@ -32,6 +32,8 @@ Widget _buildScaffold({
   SliverExpansibleComponentBuilder? bodyBuilder,
   SliverExpansibleBuilder? expansibleBuilder,
   AnimationStyle? animationStyle,
+  SliverExpansibleBodyRevealMode bodyRevealMode =
+      SliverExpansibleBodyRevealMode.sliverClipReveal,
   bool maintainState = true,
 }) {
   return MaterialApp(
@@ -43,6 +45,7 @@ Widget _buildScaffold({
               controller: controller,
               animationStyle: animationStyle,
               maintainState: maintainState,
+              bodyRevealMode: bodyRevealMode,
               headerBuilder:
                   headerBuilder ??
                   (context, animation) =>
@@ -57,6 +60,7 @@ Widget _buildScaffold({
               controller: controller,
               animationStyle: animationStyle,
               maintainState: maintainState,
+              bodyRevealMode: bodyRevealMode,
               expansibleBuilder: expansibleBuilder,
               headerBuilder:
                   headerBuilder ??
@@ -222,7 +226,10 @@ void main() {
     );
 
     final semanticsHandle = tester.ensureSemantics();
-    expect(tester.getSemantics(find.text('Body')), matchesSemantics(label: 'Body'));
+    expect(
+      tester.getSemantics(find.text('Body')),
+      matchesSemantics(label: 'Body'),
+    );
 
     controller.collapse();
     await tester.pumpAndSettle();
@@ -230,6 +237,40 @@ void main() {
 
     semanticsHandle.dispose();
   });
+
+  testWidgets(
+    'builderControlled collapsed body excluded from semantics when maintained',
+    (tester) async {
+      final controller = SliverExpansibleController();
+
+      await tester.pumpWidget(
+        _buildScaffold(
+          controller: controller,
+          bodyRevealMode: SliverExpansibleBodyRevealMode.builderControlled,
+          maintainState: true,
+          animationStyle: const AnimationStyle(
+            duration: Duration(milliseconds: 100),
+          ),
+          bodyBuilder: (context, animation) {
+            return const SliverToBoxAdapter(child: Text('Body'));
+          },
+        ),
+      );
+
+      // Subtree exists (maintained), but it's offstage in the collapsed state.
+      expect(find.text('Body', skipOffstage: false), findsOneWidget);
+
+      final semanticsHandle = tester.ensureSemantics();
+      expect(find.bySemanticsLabel('Body'), findsNothing);
+
+      controller.expand();
+      await tester.pumpAndSettle();
+
+      expect(find.bySemanticsLabel('Body'), findsOneWidget);
+
+      semanticsHandle.dispose();
+    },
+  );
 
   // ---------------------------------------------------------------------------
   // AnimationStyle
