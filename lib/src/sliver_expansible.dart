@@ -303,7 +303,7 @@ class SliverExpansible extends StatefulWidget {
 class _SliverExpansibleState extends State<SliverExpansible>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late CurvedAnimation _mainAxisFactor;
+  CurvedAnimation? _mainAxisFactor;
 
   Duration get _duration {
     return widget.animationStyle?.duration ?? _kDefaultDuration;
@@ -336,12 +336,14 @@ class _SliverExpansibleState extends State<SliverExpansible>
       widget.controller.collapse();
     }
 
-    final factorTween = Tween<double>(begin: 0, end: 1);
-    _mainAxisFactor = CurvedAnimation(
-      parent: _animationController.drive(factorTween),
-      curve: _curve,
-      reverseCurve: _reverseCurve,
-    );
+    if (widget.bodyRevealMode == .sliverClipReveal) {
+      final factorTween = Tween<double>(begin: 0, end: 1);
+      _mainAxisFactor = CurvedAnimation(
+        parent: _animationController.drive(factorTween),
+        curve: _curve,
+        reverseCurve: _reverseCurve,
+      );
+    }
 
     widget.controller.addListener(_toggleExpansion);
   }
@@ -355,10 +357,10 @@ class _SliverExpansibleState extends State<SliverExpansible>
     final oldReverseCurve = oldWidget.animationStyle?.reverseCurve;
 
     if (_curve != oldCurve) {
-      _mainAxisFactor.curve = _curve;
+      _mainAxisFactor?.curve = _curve;
     }
     if (_reverseCurve != oldReverseCurve) {
-      _mainAxisFactor.reverseCurve = _reverseCurve;
+      _mainAxisFactor?.reverseCurve = _reverseCurve;
     }
     if (_duration != oldDuration) {
       _animationController.duration = _duration;
@@ -376,7 +378,7 @@ class _SliverExpansibleState extends State<SliverExpansible>
   void dispose() {
     widget.controller.removeListener(_toggleExpansion);
     _animationController.dispose();
-    _mainAxisFactor.dispose();
+    _mainAxisFactor?.dispose();
     super.dispose();
   }
 
@@ -413,33 +415,34 @@ class _SliverExpansibleState extends State<SliverExpansible>
         !widget.controller.isExpanded && _animationController.isDismissed;
     final shouldRemoveBody = closed && !widget.maintainState;
 
-    final Widget? builtBodySliver = shouldRemoveBody
-        ? null
-        : widget.bodyBuilder(context, _animationController);
-    final Widget? bodyChild = builtBodySliver == null
-        ? null
-        : switch (widget.bodyRevealMode) {
-            .sliverClipReveal => TickerMode(
-              enabled: !closed,
-              child: builtBodySliver,
-            ),
-            .builderControlled => SliverOffstage(
-              offstage: closed,
-              sliver: TickerMode(enabled: !closed, child: builtBodySliver),
-            ),
-          };
+    final Widget result = switch (widget.bodyRevealMode) {
+      .sliverClipReveal => TickerMode(
+        enabled: !closed,
+        child: widget.bodyBuilder(context, _animationController),
+      ),
+      .builderControlled => SliverOffstage(
+        offstage: closed,
+        sliver: TickerMode(
+          enabled: !closed,
+          child: widget.bodyBuilder(context, _animationController),
+        ),
+      ),
+    };
 
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (context, child) {
         final header = widget.headerBuilder(context, _animationController);
+        final factor = _mainAxisFactor;
+
         final Widget body = switch (widget.bodyRevealMode) {
-          .sliverClipReveal => _SliverExpansibleBody(
-            factor: _mainAxisFactor,
+          .sliverClipReveal when factor != null => _SliverExpansibleBody(
+            factor: factor,
             sliver: child,
           ),
           .builderControlled =>
             child ?? const SliverToBoxAdapter(child: SizedBox.shrink()),
+          _ => const SliverToBoxAdapter(child: SizedBox.shrink()),
         };
         return widget.expansibleBuilder(
           context,
@@ -448,7 +451,7 @@ class _SliverExpansibleState extends State<SliverExpansible>
           _animationController,
         );
       },
-      child: bodyChild,
+      child: shouldRemoveBody ? null : result,
     );
   }
 }
