@@ -222,7 +222,7 @@ void main() {
     );
 
     final semanticsHandle = tester.ensureSemantics();
-    expect(tester.getSemantics(find.text('Body')), isSemantics(label: 'Body'));
+    expect(tester.getSemantics(find.text('Body')), matchesSemantics(label: 'Body'));
 
     controller.collapse();
     await tester.pumpAndSettle();
