@@ -453,176 +453,6 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
   late Curve? _reverseCurve;
   late Duration _duration;
 
-  SliverChildDelegate get _childrenDelegate {
-    if (widget.itemBuilder != null) {
-      return SliverChildBuilderDelegate(
-        widget.itemBuilder!,
-        childCount: widget.itemCount,
-      );
-    }
-    return SliverChildListDelegate(widget.children);
-  }
-
-  // Platform or null affinity defaults to trailing.
-  ListTileControlAffinity _effectiveAffinity(ListTileThemeData listTileTheme) {
-    final ListTileControlAffinity affinity =
-        widget.controlAffinity ??
-        listTileTheme.controlAffinity ??
-        ListTileControlAffinity.trailing;
-    switch (affinity) {
-      case ListTileControlAffinity.leading:
-        return ListTileControlAffinity.leading;
-      case ListTileControlAffinity.trailing:
-      case ListTileControlAffinity.platform:
-        return ListTileControlAffinity.trailing;
-    }
-  }
-
-  Widget _buildIcon(BuildContext context, Animation<double> animation) {
-    _iconTurns = animation.drive(_halfTween.chain(_easeInTween));
-    return RotationTransition(
-      turns: _iconTurns,
-      child: const Icon(Icons.expand_more),
-    );
-  }
-
-  Widget? _buildLeadingIcon(
-    BuildContext context,
-    Animation<double> animation,
-    ListTileThemeData listTileTheme,
-  ) {
-    if (_effectiveAffinity(listTileTheme) != ListTileControlAffinity.leading) {
-      return null;
-    }
-    return _buildIcon(context, animation);
-  }
-
-  Widget? _buildTrailingIcon(
-    BuildContext context,
-    Animation<double> animation,
-    ListTileThemeData listTileTheme,
-  ) {
-    if (_effectiveAffinity(listTileTheme) != ListTileControlAffinity.trailing) {
-      return null;
-    }
-    return _buildIcon(context, animation);
-  }
-
-  Widget _buildHeader(
-    BuildContext context,
-    Animation<double> animation,
-    ThemeData theme,
-    ListTileThemeData listTileTheme,
-    bool isThreeLine,
-    bool isDense,
-    VisualDensity visualDensity,
-  ) {
-    _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
-    _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(
-      context,
-    );
-    final String onTapHint = _tileController.isExpanded
-        ? localizations.expansionTileExpandedTapHint
-        : localizations.expansionTileCollapsedTapHint;
-    final String semanticsHint = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS || TargetPlatform.macOS =>
-        _tileController.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
-      _ =>
-        _tileController.isExpanded
-            ? localizations.collapsedHint
-            : localizations.expandedHint,
-    };
-
-    final Widget child = ListTileTheme.merge(
-      iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
-      textColor: _headerColor.value,
-      child: ListTile(
-        enabled: widget.enabled,
-        onTap: _tileController.isExpanded
-            ? _tileController.collapse
-            : _tileController.expand,
-        isThreeLine: isThreeLine,
-        dense: isDense,
-        splashColor: widget.splashColor,
-        visualDensity: visualDensity,
-        enableFeedback: widget.enableFeedback,
-        contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
-        leading:
-            widget.leading ??
-            _buildLeadingIcon(context, animation, listTileTheme),
-        title: widget.title,
-        subtitle: widget.subtitle,
-        trailing: widget.showTrailingIcon
-            ? widget.trailing ??
-                  _buildTrailingIcon(context, animation, listTileTheme)
-            : null,
-        minTileHeight: widget.minTileHeight,
-        internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-      ),
-    );
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return Semantics(
-        label: semanticsHint,
-        liveRegion: true,
-        child: Semantics(
-          hint: semanticsHint,
-          onTapHint: onTapHint,
-          child: child,
-        ),
-      );
-    }
-    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
-  }
-
-  Widget _buildSliverBody(BuildContext context, Animation<double> animation) {
-    final body = SliverList(delegate: _childrenDelegate);
-    final padding =
-        widget.childrenPadding ?? _expansionTileTheme.childrenPadding;
-    if (padding != null) {
-      return SliverPadding(padding: padding, sliver: body);
-    }
-    return body;
-  }
-
-  // ExpansionTile-like box reveal for eager `children`.
-  Widget _buildBody(BuildContext context, Animation<double> animation) {
-    final CurvedAnimation heightFactor = CurvedAnimation(
-      parent: animation,
-      curve: _curve,
-      reverseCurve: _reverseCurve,
-    );
-
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        return ClipRect(
-          child: Align(heightFactor: heightFactor.value, child: child),
-        );
-      },
-      child: Align(
-        alignment:
-            widget.expandedAlignment ??
-            _expansionTileTheme.expandedAlignment ??
-            Alignment.center,
-        child: Padding(
-          padding:
-              widget.childrenPadding ??
-              _expansionTileTheme.childrenPadding ??
-              EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment:
-                widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-            children: widget.children,
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -868,6 +698,171 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         tileTheme.minTileHeight ??
         theme.listTileTheme.minTileHeight ??
         defaultHeight;
+  }
+
+  // Platform or null affinity defaults to trailing.
+  ListTileControlAffinity _effectiveAffinity(ListTileThemeData listTileTheme) {
+    final ListTileControlAffinity affinity =
+        widget.controlAffinity ??
+        listTileTheme.controlAffinity ??
+        ListTileControlAffinity.trailing;
+    switch (affinity) {
+      case ListTileControlAffinity.leading:
+        return ListTileControlAffinity.leading;
+      case ListTileControlAffinity.trailing:
+      case ListTileControlAffinity.platform:
+        return ListTileControlAffinity.trailing;
+    }
+  }
+
+  Widget _buildIcon(BuildContext context, Animation<double> animation) {
+    _iconTurns = animation.drive(_halfTween.chain(_easeInTween));
+    return RotationTransition(
+      turns: _iconTurns,
+      child: const Icon(Icons.expand_more),
+    );
+  }
+
+  Widget? _buildLeadingIcon(
+    BuildContext context,
+    Animation<double> animation,
+    ListTileThemeData listTileTheme,
+  ) {
+    if (_effectiveAffinity(listTileTheme) != ListTileControlAffinity.leading) {
+      return null;
+    }
+    return _buildIcon(context, animation);
+  }
+
+  Widget? _buildTrailingIcon(
+    BuildContext context,
+    Animation<double> animation,
+    ListTileThemeData listTileTheme,
+  ) {
+    if (_effectiveAffinity(listTileTheme) != ListTileControlAffinity.trailing) {
+      return null;
+    }
+    return _buildIcon(context, animation);
+  }
+
+  Widget _buildHeader(
+    BuildContext context,
+    Animation<double> animation,
+    ThemeData theme,
+    ListTileThemeData listTileTheme,
+    bool isThreeLine,
+    bool isDense,
+    VisualDensity visualDensity,
+  ) {
+    _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
+    _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
+    final String onTapHint = _tileController.isExpanded
+        ? localizations.expansionTileExpandedTapHint
+        : localizations.expansionTileCollapsedTapHint;
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        _tileController.isExpanded
+            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ =>
+        _tileController.isExpanded
+            ? localizations.collapsedHint
+            : localizations.expandedHint,
+    };
+
+    final Widget child = ListTileTheme.merge(
+      iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
+      textColor: _headerColor.value,
+      child: ListTile(
+        enabled: widget.enabled,
+        onTap: _tileController.isExpanded
+            ? _tileController.collapse
+            : _tileController.expand,
+        isThreeLine: isThreeLine,
+        dense: isDense,
+        splashColor: widget.splashColor,
+        visualDensity: visualDensity,
+        enableFeedback: widget.enableFeedback,
+        contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
+        leading:
+            widget.leading ??
+            _buildLeadingIcon(context, animation, listTileTheme),
+        title: widget.title,
+        subtitle: widget.subtitle,
+        trailing: widget.showTrailingIcon
+            ? widget.trailing ??
+                  _buildTrailingIcon(context, animation, listTileTheme)
+            : null,
+        minTileHeight: widget.minTileHeight,
+        internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+      ),
+    );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        label: semanticsHint,
+        liveRegion: true,
+        child: Semantics(
+          hint: semanticsHint,
+          onTapHint: onTapHint,
+          child: child,
+        ),
+      );
+    }
+    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
+  }
+
+  Widget _buildSliverBody(BuildContext context, Animation<double> animation) {
+    final body = SliverList(
+      delegate: SliverChildBuilderDelegate(
+        widget.itemBuilder!,
+        childCount: widget.itemCount,
+      ),
+    );
+    final padding =
+        widget.childrenPadding ?? _expansionTileTheme.childrenPadding;
+    if (padding != null) {
+      return SliverPadding(padding: padding, sliver: body);
+    }
+    return body;
+  }
+
+  // ExpansionTile-like box reveal for eager `children`.
+  Widget _buildBody(BuildContext context, Animation<double> animation) {
+    final CurvedAnimation heightFactor = CurvedAnimation(
+      parent: animation,
+      curve: _curve,
+      reverseCurve: _reverseCurve,
+    );
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return ClipRect(
+          child: Align(heightFactor: heightFactor.value, child: child),
+        );
+      },
+      child: Align(
+        alignment:
+            widget.expandedAlignment ??
+            _expansionTileTheme.expandedAlignment ??
+            Alignment.center,
+        child: Padding(
+          padding:
+              widget.childrenPadding ??
+              _expansionTileTheme.childrenPadding ??
+              EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment:
+                widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+            children: widget.children,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildSliverExpansible(
