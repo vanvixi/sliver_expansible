@@ -299,6 +299,41 @@ void main() {
     expect(expandedColumn.crossAxisAlignment, CrossAxisAlignment.start);
   });
 
+  testWidgets('shape + clipBehavior creates a local Material for header ink', (
+    tester,
+  ) async {
+    const shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+    );
+
+    await tester.pumpWidget(
+      _buildHarness(
+        slivers: [
+          SliverExpansionTile(
+            title: const Text('Group'),
+            shape: shape,
+            collapsedShape: shape,
+            clipBehavior: Clip.antiAlias,
+            children: const [SizedBox(height: 1)],
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: find.byType(SliverPersistentHeader),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Material &&
+              w.type == MaterialType.transparency &&
+              w.clipBehavior == Clip.antiAlias,
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
+
   // -------------------------------------------------------------------------
   // Layout
   // -------------------------------------------------------------------------

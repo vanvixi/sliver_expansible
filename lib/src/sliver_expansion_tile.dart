@@ -756,6 +756,15 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
   ) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
+    final bool isShapeProvided =
+        widget.shape != null ||
+        _expansionTileTheme.shape != null ||
+        widget.collapsedShape != null ||
+        _expansionTileTheme.collapsedShape != null;
+    final Clip clipBehavior =
+        widget.clipBehavior ??
+        _expansionTileTheme.clipBehavior ??
+        Clip.antiAlias;
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       context,
     );
@@ -773,7 +782,7 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
             : localizations.expandedHint,
     };
 
-    final Widget child = ListTileTheme.merge(
+    Widget child = ListTileTheme.merge(
       iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
       textColor: _headerColor.value,
       child: ListTile(
@@ -800,6 +809,21 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),
     );
+
+    if (isShapeProvided && clipBehavior != Clip.none) {
+      final ShapeBorder headerBorder =
+          animation.drive(_borderTween.chain(_easeOutTween)).value ??
+          const Border(
+            top: BorderSide(color: Colors.transparent),
+            bottom: BorderSide(color: Colors.transparent),
+          );
+      child = Material(
+        type: MaterialType.transparency,
+        shape: headerBorder,
+        clipBehavior: clipBehavior,
+        child: child,
+      );
+    }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       return Semantics(
