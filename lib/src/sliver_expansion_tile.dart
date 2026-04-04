@@ -75,6 +75,8 @@ class SliverExpansionTile extends StatefulWidget {
     this.trailing,
     this.showTrailingIcon = true,
     this.tilePadding,
+    this.expandedCrossAxisAlignment,
+    this.expandedAlignment,
     this.controlAffinity,
     this.backgroundColor,
     this.collapsedBackgroundColor,
@@ -99,7 +101,12 @@ class SliverExpansionTile extends StatefulWidget {
     required this.title,
     this.children = const <Widget>[],
   }) : itemBuilder = null,
-       itemCount = null;
+       itemCount = null,
+       assert(
+         expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+         'CrossAxisAlignment.baseline is not supported since the expanded children '
+         'are aligned in a column, not a row. Try to use another constant.',
+       );
 
   /// Creates a [SliverExpansionTile] that lazily builds its children.
   ///
@@ -141,7 +148,9 @@ class SliverExpansionTile extends StatefulWidget {
     this.onExpansionChanged,
     this.internalAddSemanticForOnTap = false,
     required this.title,
-  }) : children = const <Widget>[];
+  }) : children = const <Widget>[],
+       expandedAlignment = null,
+       expandedCrossAxisAlignment = null;
 
   /// The primary content of the header row.
   ///
@@ -232,6 +241,25 @@ class SliverExpansionTile extends StatefulWidget {
   /// If this property is null then [ExpansionTileThemeData.tilePadding] is
   /// used.
   final EdgeInsetsGeometry? tilePadding;
+
+  /// The alignment of the expanded children within the available space.
+  ///
+  /// If null, defaults to [ExpansionTileThemeData.expandedAlignment], and then
+  /// to [Alignment.center].
+  ///
+  /// This property only affects the expanded body when using the default
+  /// constructor with [children]. It is ignored by
+  /// [SliverExpansionTile.builder], since lazy children are built as slivers.
+  final AlignmentGeometry? expandedAlignment;
+
+  /// The cross-axis alignment of the expanded children.
+  ///
+  /// If null, defaults to [CrossAxisAlignment.center].
+  ///
+  /// This property only affects the expanded body when using the default
+  /// constructor with [children]. It is ignored by
+  /// [SliverExpansionTile.builder], since lazy children are built as slivers.
+  final CrossAxisAlignment? expandedCrossAxisAlignment;
 
   /// Typically used to force the expansion arrow icon to the tile's leading or
   /// trailing edge.
@@ -925,11 +953,21 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
             _expansionTileTheme.childrenPadding ??
             EdgeInsets.zero;
 
-        final Widget result = Padding(
-          padding: resolvedChildrenPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: widget.children,
+        final AlignmentGeometry alignment =
+            widget.expandedAlignment ??
+            _expansionTileTheme.expandedAlignment ??
+            Alignment.center;
+        final CrossAxisAlignment crossAxisAlignment =
+            widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center;
+
+        final Widget result = Align(
+          alignment: alignment,
+          child: Padding(
+            padding: resolvedChildrenPadding,
+            child: Column(
+              crossAxisAlignment: crossAxisAlignment,
+              children: widget.children,
+            ),
           ),
         );
 
@@ -939,10 +977,7 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
             child: result,
             builder: (context, child) {
               return ClipRect(
-                child: Align(
-                  heightFactor: heightFactor.value,
-                  child: child,
-                ),
+                child: Align(heightFactor: heightFactor.value, child: child),
               );
             },
           ),
