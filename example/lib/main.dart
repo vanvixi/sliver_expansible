@@ -60,7 +60,7 @@ class SliverExpansibleExamplePage extends StatelessWidget {
             SliverExpansibleTitleCustom(
               key: const PageStorageKey<String>('section-a'),
               title: 'Section A',
-              itemCount: 30,
+              itemCount: 4,
               pinnedHeader: settings.pinnedHeader,
               maintainState: settings.maintainState,
             ),
@@ -68,7 +68,7 @@ class SliverExpansibleExamplePage extends StatelessWidget {
             SliverExpansibleTitleCustom(
               key: const PageStorageKey<String>('section-b'),
               title: 'Section B',
-              itemCount: 20,
+              itemCount: 4,
               pinnedHeader: settings.pinnedHeader,
               maintainState: settings.maintainState,
             ),
@@ -76,7 +76,7 @@ class SliverExpansibleExamplePage extends StatelessWidget {
             SliverExpansibleTitleCustom(
               key: const PageStorageKey<String>('section-c'),
               title: 'Section C',
-              itemCount: 12,
+              itemCount: 4,
               pinnedHeader: settings.pinnedHeader,
               maintainState: settings.maintainState,
             ),
@@ -135,14 +135,14 @@ class SliverExpansibleTitleCustom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = Colors.primaries[title.hashCode % Colors.primaries.length];
     return SliverExpansionTile(
       title: Text(title),
       pinned: pinnedHeader,
       maintainState: maintainState,
-      backgroundColor: Colors.lightGreen,
-      collapsedBackgroundColor: Colors.lightGreen,
-      pinnedHeaderColor: Colors.lightGreen,
-
+      backgroundColor: color,
+      collapsedBackgroundColor: color,
+      pinnedHeaderColor: color,
       shape: const RoundedRectangleBorder(
         borderRadius: .all(Radius.circular(12)),
       ),
