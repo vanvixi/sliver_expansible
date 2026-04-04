@@ -42,6 +42,9 @@ const Duration _kExpand = Duration(milliseconds: 200);
 ///
 /// ## Lazy building
 ///
+/// The default [SliverExpansionTile] constructor takes an eager list of
+/// [children] and reveals them with a box-based expand/collapse animation.
+///
 /// Use the [SliverExpansionTile.builder] constructor to lazily build children,
 /// avoiding unnecessary widget creation when the tile is collapsed.
 ///
@@ -857,6 +860,9 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
 
     return SliverExpansible(
       controller: _tileController,
+      bodyRevealMode: widget.itemBuilder != null
+          ? SliverExpansibleBodyRevealMode.sliverClipReveal
+          : SliverExpansibleBodyRevealMode.builderControlled,
       animationStyle: AnimationStyle(
         duration: _duration,
         curve: _curve,
@@ -896,13 +902,51 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         );
       },
       bodyBuilder: (context, animation) {
-        final body = SliverList(delegate: _childrenDelegate);
-        final padding =
-            widget.childrenPadding ?? _expansionTileTheme.childrenPadding;
-        if (padding != null) {
-          return SliverPadding(padding: padding, sliver: body);
+        // Lazy sliver body for `.builder`.
+        if (widget.itemBuilder != null) {
+          final body = SliverList(delegate: _childrenDelegate);
+          final padding =
+              widget.childrenPadding ?? _expansionTileTheme.childrenPadding;
+          if (padding != null) {
+            return SliverPadding(padding: padding, sliver: body);
+          }
+          return body;
         }
-        return body;
+
+        // Flutter-like box reveal for eager `children`.
+        final CurvedAnimation heightFactor = CurvedAnimation(
+          parent: animation,
+          curve: _curve,
+          reverseCurve: _reverseCurve,
+        );
+
+        final EdgeInsetsGeometry resolvedChildrenPadding =
+            widget.childrenPadding ??
+            _expansionTileTheme.childrenPadding ??
+            EdgeInsets.zero;
+
+        final Widget result = Padding(
+          padding: resolvedChildrenPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: widget.children,
+          ),
+        );
+
+        return SliverToBoxAdapter(
+          child: AnimatedBuilder(
+            animation: animation,
+            child: result,
+            builder: (context, child) {
+              return ClipRect(
+                child: Align(
+                  heightFactor: heightFactor.value,
+                  child: child,
+                ),
+              );
+            },
+          ),
+        );
       },
     );
   }

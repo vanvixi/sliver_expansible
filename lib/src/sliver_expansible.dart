@@ -30,7 +30,12 @@ typedef SliverExpansibleComponentBuilder =
 /// [SliverExpansible.headerBuilder].
 ///
 /// The `body` property is the body returned by [SliverExpansible.bodyBuilder]
-/// wrapped in an internal sliver that expands and collapses it.
+/// optionally wrapped in an internal sliver that expands and collapses it,
+/// depending on [SliverExpansible.bodyRevealMode].
+///
+/// In [SliverExpansibleBodyRevealMode.builderControlled], the body may also be
+/// wrapped in a [SliverOffstage] and [TickerMode] when the widget is fully
+/// collapsed, mirroring the behavior of [Expansible].
 ///
 /// The `animation` property exposes the underlying expanding or collapsing
 /// animation, which has a value of 0 when the [SliverExpansible] is completely
@@ -46,6 +51,27 @@ typedef SliverExpansibleBuilder =
       Widget body,
       Animation<double> animation,
     );
+
+/// Controls how the collapsible body of a [SliverExpansible] is revealed.
+enum SliverExpansibleBodyRevealMode {
+  /// Wraps the body sliver in an internal sliver that animates its main axis
+  /// extent from zero to its fully expanded extent.
+  ///
+  /// This mode keeps sliver bodies lazy (for example, only visible list items
+  /// are built).
+  sliverClipReveal,
+
+  /// Leaves the body sliver as built by [SliverExpansible.bodyBuilder].
+  ///
+  /// In this mode, the [SliverExpansible] does not apply any reveal/collapse
+  /// wrapper. The builder is responsible for revealing the content.
+  ///
+  /// When the [SliverExpansible] is fully collapsed (the animation is
+  /// dismissed), the body is wrapped in a [SliverOffstage] and [TickerMode] to
+  /// hide it from paint, hit testing, and semantics, and to disable tickers in
+  /// the body subtree.
+  builderControlled,
+}
 
 /// A controller for managing the expansion state of a [SliverExpansible].
 ///
@@ -210,6 +236,7 @@ class SliverExpansible extends StatefulWidget {
     super.key,
     this.expansibleBuilder = _defaultExpansibleBuilder,
     this.animationStyle,
+    this.bodyRevealMode = SliverExpansibleBodyRevealMode.sliverClipReveal,
     this.maintainState = true,
   });
 
@@ -223,6 +250,11 @@ class SliverExpansible extends StatefulWidget {
 
   /// Builds the collapsible body sliver.
   final SliverExpansibleComponentBuilder bodyBuilder;
+
+  /// Controls how the body sliver is revealed when expanding/collapsing.
+  ///
+  /// Defaults to [SliverExpansibleBodyRevealMode.sliverClipReveal].
+  final SliverExpansibleBodyRevealMode bodyRevealMode;
 
   /// Used to override the expansion animation curve and duration.
   ///
@@ -381,19 +413,34 @@ class _SliverExpansibleState extends State<SliverExpansible>
         !widget.controller.isExpanded && _animationController.isDismissed;
     final shouldRemoveBody = closed && !widget.maintainState;
 
-    final bodySliver = TickerMode(
-      enabled: !closed,
-      child: widget.bodyBuilder(context, _animationController),
-    );
+    final Widget? builtBodySliver = shouldRemoveBody
+        ? null
+        : widget.bodyBuilder(context, _animationController);
+    final Widget? bodyChild = builtBodySliver == null
+        ? null
+        : switch (widget.bodyRevealMode) {
+            .sliverClipReveal => TickerMode(
+              enabled: !closed,
+              child: builtBodySliver,
+            ),
+            .builderControlled => SliverOffstage(
+              offstage: closed,
+              sliver: TickerMode(enabled: !closed, child: builtBodySliver),
+            ),
+          };
 
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (context, child) {
         final header = widget.headerBuilder(context, _animationController);
-        final body = _SliverExpansibleBody(
-          factor: _mainAxisFactor,
-          sliver: child,
-        );
+        final Widget body = switch (widget.bodyRevealMode) {
+          .sliverClipReveal => _SliverExpansibleBody(
+            factor: _mainAxisFactor,
+            sliver: child,
+          ),
+          .builderControlled =>
+            child ?? const SliverToBoxAdapter(child: SizedBox.shrink()),
+        };
         return widget.expansibleBuilder(
           context,
           header,
@@ -401,7 +448,7 @@ class _SliverExpansibleState extends State<SliverExpansible>
           _animationController,
         );
       },
-      child: shouldRemoveBody ? null : bodySliver,
+      child: bodyChild,
     );
   }
 }
