@@ -765,6 +765,7 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         widget.clipBehavior ??
         _expansionTileTheme.clipBehavior ??
         Clip.antiAlias;
+    final ShapeBorder? inkShape = _headerInkClipShape(context, animation);
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       context,
     );
@@ -806,20 +807,15 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
                   _buildTrailingIcon(context, animation, listTileTheme)
             : null,
         minTileHeight: widget.minTileHeight,
+        shape: inkShape,
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),
     );
 
-    if (isShapeProvided && clipBehavior != Clip.none) {
-      final ShapeBorder headerBorder =
-          animation.drive(_borderTween.chain(_easeOutTween)).value ??
-          const Border(
-            top: BorderSide(color: Colors.transparent),
-            bottom: BorderSide(color: Colors.transparent),
-          );
+    if (isShapeProvided) {
       child = Material(
         type: MaterialType.transparency,
-        shape: headerBorder,
+        shape: inkShape,
         clipBehavior: clipBehavior,
         child: child,
       );
@@ -837,6 +833,95 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
       );
     }
     return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
+  }
+
+  ShapeBorder? _headerInkClipShape(
+    BuildContext context,
+    Animation<double> animation,
+  ) {
+    final bool isShapeProvided =
+        widget.shape != null ||
+        _expansionTileTheme.shape != null ||
+        widget.collapsedShape != null ||
+        _expansionTileTheme.collapsedShape != null;
+    if (!isShapeProvided) {
+      return null;
+    }
+
+    final bool closed =
+        !_tileController.isExpanded &&
+        animation.status == AnimationStatus.dismissed;
+    final bool topOnly = !closed;
+
+    final double t = _easeOutTween.transform(animation.value);
+    final ShapeBorder border =
+        _borderTween.lerp(t) ??
+        const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        );
+
+    final TextDirection textDirection = Directionality.of(context);
+    return _headerInkClipShapeFromBorder(
+      border,
+      topOnly: topOnly,
+      textDirection: textDirection,
+    );
+  }
+
+  ShapeBorder _headerInkClipShapeFromBorder(
+    ShapeBorder border, {
+    required bool topOnly,
+    required TextDirection textDirection,
+  }) {
+    if (border is RoundedRectangleBorder) {
+      final BorderRadius radius = border.borderRadius.resolve(textDirection);
+      final BorderRadius clippedRadius = topOnly
+          ? BorderRadius.only(
+              topLeft: radius.topLeft,
+              topRight: radius.topRight,
+            )
+          : radius;
+      return RoundedRectangleBorder(
+        borderRadius: clippedRadius,
+        side: BorderSide.none,
+      );
+    }
+
+    if (border is ContinuousRectangleBorder) {
+      final BorderRadius radius = border.borderRadius.resolve(textDirection);
+      final BorderRadius clippedRadius = topOnly
+          ? BorderRadius.only(
+              topLeft: radius.topLeft,
+              topRight: radius.topRight,
+            )
+          : radius;
+      return ContinuousRectangleBorder(
+        borderRadius: clippedRadius,
+        side: BorderSide.none,
+      );
+    }
+
+    if (border is BeveledRectangleBorder) {
+      final BorderRadius radius = border.borderRadius.resolve(textDirection);
+      final BorderRadius clippedRadius = topOnly
+          ? BorderRadius.only(
+              topLeft: radius.topLeft,
+              topRight: radius.topRight,
+            )
+          : radius;
+      return BeveledRectangleBorder(
+        borderRadius: clippedRadius,
+        side: BorderSide.none,
+      );
+    }
+
+    // Fallback: keep the original border. Remove the side when possible to
+    // avoid painting an extra border on the header.
+    if (border is OutlinedBorder) {
+      return border.copyWith(side: BorderSide.none);
+    }
+    return border;
   }
 
   Widget _buildSliverBody(BuildContext context, Animation<double> animation) {
