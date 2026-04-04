@@ -299,17 +299,20 @@ void main() {
     expect(expandedColumn.crossAxisAlignment, CrossAxisAlignment.start);
   });
 
-  testWidgets('shape + clipBehavior creates a local Material for header ink', (
+  testWidgets('header ripple shape uses top-only corners when expanded', (
     tester,
   ) async {
     const shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
     );
 
+    final controller = SliverExpansibleController();
+
     await tester.pumpWidget(
       _buildHarness(
         slivers: [
           SliverExpansionTile(
+            controller: controller,
             title: const Text('Group'),
             shape: shape,
             collapsedShape: shape,
@@ -320,18 +323,29 @@ void main() {
       ),
     );
 
-    expect(
-      find.descendant(
-        of: find.byType(SliverPersistentHeader),
-        matching: find.byWidgetPredicate(
-          (w) =>
-              w is Material &&
-              w.type == MaterialType.transparency &&
-              w.clipBehavior == Clip.antiAlias,
-        ),
-      ),
-      findsOneWidget,
-    );
+    final listTileCollapsed = tester.widget<ListTile>(find.byType(ListTile));
+    final collapsedShape =
+        listTileCollapsed.shape as RoundedRectangleBorder?;
+    expect(collapsedShape, isNotNull);
+    final collapsedRadius =
+        collapsedShape!.borderRadius.resolve(TextDirection.ltr);
+    expect(collapsedRadius.topLeft, const Radius.circular(12));
+    expect(collapsedRadius.topRight, const Radius.circular(12));
+    expect(collapsedRadius.bottomLeft, const Radius.circular(12));
+    expect(collapsedRadius.bottomRight, const Radius.circular(12));
+
+    controller.expand();
+    await tester.pump();
+
+    final listTileExpanded = tester.widget<ListTile>(find.byType(ListTile));
+    final expandedShape = listTileExpanded.shape as RoundedRectangleBorder?;
+    expect(expandedShape, isNotNull);
+    final expandedRadius =
+        expandedShape!.borderRadius.resolve(TextDirection.ltr);
+    expect(expandedRadius.topLeft, const Radius.circular(12));
+    expect(expandedRadius.topRight, const Radius.circular(12));
+    expect(expandedRadius.bottomLeft, Radius.zero);
+    expect(expandedRadius.bottomRight, Radius.zero);
   });
 
   // -------------------------------------------------------------------------
