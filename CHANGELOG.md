@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Fix Gif demo url not show in pub.dev
+
 ## 0.1.0
 
 - Initial release.
