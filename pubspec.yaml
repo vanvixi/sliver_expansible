@@ -26,5 +26,5 @@ topics:
   - ui
 
 screenshots:
-  - description: Demo
+  - description: Sliver expansion demo
     path: screenshots/demo.gif
