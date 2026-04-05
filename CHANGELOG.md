@@ -1,4 +1,4 @@
-## 0.q.0
+## 0.1.0
 
 - Initial release.
 - Add `SliverExpansible` + `SliverExpansibleController` (expand/collapse a body sliver with animation).
