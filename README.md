@@ -9,7 +9,9 @@ Sliver expansion primitives for Flutter:
 
 ## Demo
 
-![Demo](screenshots/demo.gif)
+<p align="center">
+  <img src="screenshots/demo.gif" height="720" alt="Demo" />
+</p>
 
 ## Getting started
 
@@ -108,4 +110,7 @@ See the runnable app in `example/` for a more complete demo.
 ## Notes
 
 - `SliverExpansionTile` follows `ExpansionTileThemeData` (Material theming).
+- Technical limitation: to support lazy building with
+  `SliverExpansionTile.builder()`, the expand/collapse animation can’t exactly
+  match `ExpansionTile` (current limitation of sliver rendering).
 - If you pass a `SliverExpansibleController`, remember to `dispose()` it.
