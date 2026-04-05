@@ -20,8 +20,8 @@ const Curve _kDefaultCurve = Curves.ease;
 ///
 ///  * [SliverExpansible.sliverHeaderBuilder], which is of this type.
 ///  * [SliverExpansible.sliverBodyBuilder], which is also of this type.
-typedef SliverExpansibleComponentBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef SliverExpansibleComponentBuilder = Widget Function(
+    BuildContext context, Animation<double> animation);
 
 /// The type of the callback that uses the header and body of a
 /// [SliverExpansible] widget to build the sliver.
@@ -44,13 +44,12 @@ typedef SliverExpansibleComponentBuilder =
 /// See also:
 ///
 ///  * [SliverExpansible.sliverExpansibleBuilder], which is of this type.
-typedef SliverExpansibleBuilder =
-    Widget Function(
-      BuildContext context,
-      Widget header,
-      Widget body,
-      Animation<double> animation,
-    );
+typedef SliverExpansibleBuilder = Widget Function(
+  BuildContext context,
+  Widget header,
+  Widget body,
+  Animation<double> animation,
+);
 
 /// Controls how the collapsible body of a [SliverExpansible] is revealed.
 enum SliverExpansibleBodyRevealMode {
@@ -327,7 +326,7 @@ class _SliverExpansibleState extends State<SliverExpansible>
 
     final initiallyExpanded =
         PageStorage.maybeOf(context)?.readState(context) as bool? ??
-        widget.controller.isExpanded;
+            widget.controller.isExpanded;
 
     if (initiallyExpanded) {
       _animationController.value = 1;
@@ -418,16 +417,16 @@ class _SliverExpansibleState extends State<SliverExpansible>
 
     final Widget result = switch (widget.bodyRevealMode) {
       SliverExpansibleBodyRevealMode.sliverClipReveal => TickerMode(
-        enabled: !closed,
-        child: widget.sliverBodyBuilder(context, _animationController),
-      ),
-      SliverExpansibleBodyRevealMode.builderControlled => SliverOffstage(
-        offstage: closed,
-        sliver: TickerMode(
           enabled: !closed,
           child: widget.sliverBodyBuilder(context, _animationController),
         ),
-      ),
+      SliverExpansibleBodyRevealMode.builderControlled => SliverOffstage(
+          offstage: closed,
+          sliver: TickerMode(
+            enabled: !closed,
+            child: widget.sliverBodyBuilder(context, _animationController),
+          ),
+        ),
     };
 
     return AnimatedBuilder(
@@ -442,9 +441,9 @@ class _SliverExpansibleState extends State<SliverExpansible>
         final Widget body = switch (widget.bodyRevealMode) {
           SliverExpansibleBodyRevealMode.sliverClipReveal when factor != null =>
             _SliverExpansibleBody(
-            factor: factor,
-            sliver: child,
-          ),
+              factor: factor,
+              sliver: child,
+            ),
           SliverExpansibleBodyRevealMode.builderControlled =>
             child ?? const SliverToBoxAdapter(child: SizedBox.shrink()),
           _ => const SliverToBoxAdapter(child: SizedBox.shrink()),
@@ -463,7 +462,7 @@ class _SliverExpansibleState extends State<SliverExpansible>
 
 class _SliverExpansibleBody extends SingleChildRenderObjectWidget {
   const _SliverExpansibleBody({required this.factor, Widget? sliver})
-    : super(child: sliver);
+      : super(child: sliver);
 
   final Animation<double> factor;
 
@@ -484,7 +483,7 @@ class _SliverExpansibleBody extends SingleChildRenderObjectWidget {
 class _RenderSliverExpansibleBody extends RenderProxySliver
     with RenderSliverHelpers {
   _RenderSliverExpansibleBody({required Animation<double> factor})
-    : _factor = factor {
+      : _factor = factor {
     _wasOffstage = _isOffstage;
     _factor.addListener(_handleFactorChanged);
   }

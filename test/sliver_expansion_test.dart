@@ -46,12 +46,10 @@ Widget _buildScaffold({
               animationStyle: animationStyle,
               maintainState: maintainState,
               bodyRevealMode: bodyRevealMode,
-              sliverHeaderBuilder:
-                  headerBuilder ??
+              sliverHeaderBuilder: headerBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Header')),
-              sliverBodyBuilder:
-                  bodyBuilder ??
+              sliverBodyBuilder: bodyBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Body')),
             )
@@ -62,12 +60,10 @@ Widget _buildScaffold({
               maintainState: maintainState,
               bodyRevealMode: bodyRevealMode,
               sliverExpansibleBuilder: expansibleBuilder,
-              sliverHeaderBuilder:
-                  headerBuilder ??
+              sliverHeaderBuilder: headerBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Header')),
-              sliverBodyBuilder:
-                  bodyBuilder ??
+              sliverBodyBuilder: bodyBuilder ??
                   (context, animation) =>
                       const SliverToBoxAdapter(child: Text('Body')),
             ),
@@ -358,15 +354,15 @@ void main() {
     final controllerB = SliverExpansibleController(); // collapsed
 
     Widget buildWith(SliverExpansibleController c) => _buildScaffold(
-      controller: c,
-      maintainState: false,
-      animationStyle: const AnimationStyle(
-        duration: Duration(milliseconds: 50),
-      ),
-      bodyBuilder: (context, animation) {
-        return const SliverToBoxAdapter(child: Text('Body'));
-      },
-    );
+          controller: c,
+          maintainState: false,
+          animationStyle: const AnimationStyle(
+            duration: Duration(milliseconds: 50),
+          ),
+          bodyBuilder: (context, animation) {
+            return const SliverToBoxAdapter(child: Text('Body'));
+          },
+        );
 
     await tester.pumpWidget(buildWith(controllerA));
     await tester.pumpAndSettle();

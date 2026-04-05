@@ -119,7 +119,8 @@ void main() {
   // Lazy build (builder)
   // -------------------------------------------------------------------------
 
-  testWidgets('eager children are built even when collapsed (maintainState=true)', (
+  testWidgets(
+      'eager children are built even when collapsed (maintainState=true)', (
     tester,
   ) async {
     final controller = SliverExpansibleController();
@@ -159,7 +160,8 @@ void main() {
     final bodyOffstage = group.children[1] as SliverOffstage;
     expect(bodyOffstage.offstage, isTrue);
     expect(bodyOffstage.child, isA<TickerMode>());
-    expect((bodyOffstage.child! as TickerMode).child, isA<SliverToBoxAdapter>());
+    expect(
+        (bodyOffstage.child! as TickerMode).child, isA<SliverToBoxAdapter>());
 
     expect(find.text('Body', skipOffstage: false), findsOneWidget);
 
@@ -263,7 +265,9 @@ void main() {
     expect(buildCount, lessThan(400));
   });
 
-  testWidgets('expandedAlignment and expandedCrossAxisAlignment apply to eager children only', (
+  testWidgets(
+      'expandedAlignment and expandedCrossAxisAlignment apply to eager children only',
+      (
     tester,
   ) async {
     final controller = SliverExpansibleController()..expand();
@@ -324,8 +328,7 @@ void main() {
     );
 
     final listTileCollapsed = tester.widget<ListTile>(find.byType(ListTile));
-    final collapsedShape =
-        listTileCollapsed.shape as RoundedRectangleBorder?;
+    final collapsedShape = listTileCollapsed.shape as RoundedRectangleBorder?;
     expect(collapsedShape, isNotNull);
     final collapsedRadius =
         collapsedShape!.borderRadius.resolve(TextDirection.ltr);

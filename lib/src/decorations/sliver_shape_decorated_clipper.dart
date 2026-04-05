@@ -54,11 +54,11 @@ class _RenderSliverShapeDecoratedClipper extends RenderProxySliver {
     required bool isPinned,
     required double headerExtent,
     required ImageConfiguration configuration,
-  }) : _decoration = decoration,
-       _clipBehavior = clipBehavior,
-       _isPinned = isPinned,
-       _headerExtent = headerExtent,
-       _configuration = configuration;
+  })  : _decoration = decoration,
+        _clipBehavior = clipBehavior,
+        _isPinned = isPinned,
+        _headerExtent = headerExtent,
+        _configuration = configuration;
 
   ShapeDecoration get decoration => _decoration;
   ShapeDecoration _decoration;
@@ -155,34 +155,35 @@ class _RenderSliverShapeDecoratedClipper extends RenderProxySliver {
     );
     final Rect paintRect = switch (axisDirection) {
       AxisDirection.up => Rect.fromLTWH(
-        0.0,
-        0.0,
-        constraints.crossAxisExtent,
-        math.max(0.0, child!.geometry!.paintExtent),
-      ),
+          0.0,
+          0.0,
+          constraints.crossAxisExtent,
+          math.max(0.0, child!.geometry!.paintExtent),
+        ),
       AxisDirection.right => Rect.fromLTWH(
-        child!.geometry!.paintOrigin,
-        0.0,
-        math.max(0.0, child!.geometry!.paintExtent),
-        constraints.crossAxisExtent,
-      ),
+          child!.geometry!.paintOrigin,
+          0.0,
+          math.max(0.0, child!.geometry!.paintExtent),
+          constraints.crossAxisExtent,
+        ),
       AxisDirection.down => Rect.fromLTWH(
-        0.0,
-        child!.geometry!.paintOrigin,
-        constraints.crossAxisExtent,
-        math.max(0.0, child!.geometry!.paintExtent),
-      ),
+          0.0,
+          child!.geometry!.paintOrigin,
+          constraints.crossAxisExtent,
+          math.max(0.0, child!.geometry!.paintExtent),
+        ),
       AxisDirection.left => Rect.fromLTWH(
-        0.0,
-        0.0,
-        math.max(0.0, child!.geometry!.paintExtent),
-        constraints.crossAxisExtent,
-      ),
+          0.0,
+          0.0,
+          math.max(0.0, child!.geometry!.paintExtent),
+          constraints.crossAxisExtent,
+        ),
     };
 
     // Cap to the cache window to avoid huge clip layers.
-    final double maxCachedMainAxisExtent =
-        constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin;
+    final double maxCachedMainAxisExtent = constraints.scrollOffset +
+        child!.geometry!.cacheExtent +
+        constraints.cacheOrigin;
     final double cappedMainAxisExtent = math.min(
       child!.geometry!.scrollExtent,
       maxCachedMainAxisExtent,
@@ -190,17 +191,18 @@ class _RenderSliverShapeDecoratedClipper extends RenderProxySliver {
 
     final (Size childSize, Offset scrollOffset) = switch (constraints.axis) {
       Axis.horizontal => (
-        Size(cappedMainAxisExtent, constraints.crossAxisExtent),
-        Offset(-constraints.scrollOffset, 0.0),
-      ),
+          Size(cappedMainAxisExtent, constraints.crossAxisExtent),
+          Offset(-constraints.scrollOffset, 0.0),
+        ),
       Axis.vertical => (
-        Size(constraints.crossAxisExtent, cappedMainAxisExtent),
-        Offset(0.0, -constraints.scrollOffset),
-      ),
+          Size(constraints.crossAxisExtent, cappedMainAxisExtent),
+          Offset(0.0, -constraints.scrollOffset),
+        ),
     };
 
     final bool pinnedActive = isPinned && constraints.scrollOffset > 0.0;
-    final Offset decorationScrollOffset = pinnedActive ? Offset.zero : scrollOffset;
+    final Offset decorationScrollOffset =
+        pinnedActive ? Offset.zero : scrollOffset;
 
     // When pinned, model the remaining tile portion so bottom corners appear
     // at the correct position when they become visible.
@@ -211,7 +213,8 @@ class _RenderSliverShapeDecoratedClipper extends RenderProxySliver {
               child!.geometry!.scrollExtent - constraints.scrollOffset,
             );
             final double minPinnedExtent = math.max(0.0, headerExtent);
-            final double unclamped = math.max(minPinnedExtent, remainingScrollExtent);
+            final double unclamped =
+                math.max(minPinnedExtent, remainingScrollExtent);
             final double maxCachedRelativeExtent = math.max(
               0.0,
               child!.geometry!.cacheExtent + constraints.cacheOrigin,
@@ -220,7 +223,8 @@ class _RenderSliverShapeDecoratedClipper extends RenderProxySliver {
                 ? unclamped
                 : math.min(unclamped, maxCachedRelativeExtent);
             return switch (constraints.axis) {
-              Axis.horizontal => Size(pinnedExtent, constraints.crossAxisExtent),
+              Axis.horizontal =>
+                Size(pinnedExtent, constraints.crossAxisExtent),
               Axis.vertical => Size(constraints.crossAxisExtent, pinnedExtent),
             };
           }()

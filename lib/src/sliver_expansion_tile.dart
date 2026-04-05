@@ -100,13 +100,13 @@ class SliverExpansionTile extends StatefulWidget {
     this.internalAddSemanticForOnTap = false,
     required this.title,
     this.children = const <Widget>[],
-  }) : itemBuilder = null,
-       itemCount = null,
-       assert(
-         expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
-         'CrossAxisAlignment.baseline is not supported since the expanded children '
-         'are aligned in a column, not a row. Try to use another constant.',
-       );
+  })  : itemBuilder = null,
+        itemCount = null,
+        assert(
+          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+          'CrossAxisAlignment.baseline is not supported since the expanded children '
+          'are aligned in a column, not a row. Try to use another constant.',
+        );
 
   /// Creates a [SliverExpansionTile] that lazily builds its children.
   ///
@@ -148,9 +148,9 @@ class SliverExpansionTile extends StatefulWidget {
     this.onExpansionChanged,
     this.internalAddSemanticForOnTap = false,
     required this.title,
-  }) : children = const <Widget>[],
-       expandedAlignment = null,
-       expandedCrossAxisAlignment = null;
+  })  : children = const <Widget>[],
+        expandedAlignment = null,
+        expandedCrossAxisAlignment = null;
 
   /// The primary content of the header row.
   ///
@@ -566,65 +566,55 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
   }
 
   void _updateAnimationDuration() {
-    _duration =
-        widget.expansionAnimationStyle?.duration ??
+    _duration = widget.expansionAnimationStyle?.duration ??
         _expansionTileTheme.expansionAnimationStyle?.duration ??
         _kExpand;
   }
 
   void _updateHeaderColor(ExpansionTileThemeData defaults) {
     _headerColorTween
-      ..begin =
-          widget.collapsedTextColor ??
+      ..begin = widget.collapsedTextColor ??
           _expansionTileTheme.collapsedTextColor ??
           defaults.collapsedTextColor
-      ..end =
-          widget.textColor ??
+      ..end = widget.textColor ??
           _expansionTileTheme.textColor ??
           defaults.textColor;
   }
 
   void _updateIconColor(ExpansionTileThemeData defaults) {
     _iconColorTween
-      ..begin =
-          widget.collapsedIconColor ??
+      ..begin = widget.collapsedIconColor ??
           _expansionTileTheme.collapsedIconColor ??
           defaults.collapsedIconColor
-      ..end =
-          widget.iconColor ??
+      ..end = widget.iconColor ??
           _expansionTileTheme.iconColor ??
           defaults.iconColor;
   }
 
   void _updateBackgroundColor() {
     _backgroundColorTween
-      ..begin =
-          widget.collapsedBackgroundColor ??
+      ..begin = widget.collapsedBackgroundColor ??
           _expansionTileTheme.collapsedBackgroundColor
       ..end = widget.backgroundColor ?? _expansionTileTheme.backgroundColor;
   }
 
   void _updateHeightFactorCurve() {
-    _curve =
-        widget.expansionAnimationStyle?.curve ??
+    _curve = widget.expansionAnimationStyle?.curve ??
         _expansionTileTheme.expansionAnimationStyle?.curve ??
         Curves.easeIn;
-    _reverseCurve =
-        widget.expansionAnimationStyle?.reverseCurve ??
+    _reverseCurve = widget.expansionAnimationStyle?.reverseCurve ??
         _expansionTileTheme.expansionAnimationStyle?.reverseCurve;
   }
 
   void _updateShapeBorder(ThemeData theme) {
     _borderTween
-      ..begin =
-          widget.collapsedShape ??
+      ..begin = widget.collapsedShape ??
           _expansionTileTheme.collapsedShape ??
           const Border(
             top: BorderSide(color: Colors.transparent),
             bottom: BorderSide(color: Colors.transparent),
           )
-      ..end =
-          widget.shape ??
+      ..end = widget.shape ??
           _expansionTileTheme.shape ??
           Border(
             top: BorderSide(color: theme.dividerColor),
@@ -668,15 +658,13 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
   }
 
   double _effectiveHeaderExtent(ThemeData theme, ListTileThemeData tileTheme) {
-    final VisualDensity effectiveVisualDensity =
-        widget.visualDensity ??
+    final VisualDensity effectiveVisualDensity = widget.visualDensity ??
         tileTheme.visualDensity ??
         theme.listTileTheme.visualDensity ??
         theme.visualDensity;
 
     final bool isDense = _isDenseLayout(theme, tileTheme);
-    final bool isThreeLine =
-        widget.isThreeLine ??
+    final bool isThreeLine = widget.isThreeLine ??
         tileTheme.isThreeLine ??
         theme.listTileTheme.isThreeLine ??
         false;
@@ -702,8 +690,7 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
 
   // Platform or null affinity defaults to trailing.
   ListTileControlAffinity _effectiveAffinity(ListTileThemeData listTileTheme) {
-    final ListTileControlAffinity affinity =
-        widget.controlAffinity ??
+    final ListTileControlAffinity affinity = widget.controlAffinity ??
         listTileTheme.controlAffinity ??
         ListTileControlAffinity.trailing;
     switch (affinity) {
@@ -756,13 +743,11 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
   ) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-    final bool isShapeProvided =
-        widget.shape != null ||
+    final bool isShapeProvided = widget.shape != null ||
         _expansionTileTheme.shape != null ||
         widget.collapsedShape != null ||
         _expansionTileTheme.collapsedShape != null;
-    final Clip clipBehavior =
-        widget.clipBehavior ??
+    final Clip clipBehavior = widget.clipBehavior ??
         _expansionTileTheme.clipBehavior ??
         Clip.antiAlias;
     final ShapeBorder? inkShape = _headerInkClipShape(context, animation);
@@ -773,14 +758,12 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         ? localizations.expansionTileExpandedTapHint
         : localizations.expansionTileCollapsedTapHint;
     final String semanticsHint = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS || TargetPlatform.macOS =>
-        _tileController.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
-      _ =>
-        _tileController.isExpanded
-            ? localizations.collapsedHint
-            : localizations.expandedHint,
+      TargetPlatform.iOS || TargetPlatform.macOS => _tileController.isExpanded
+          ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+          : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded
+          ? localizations.collapsedHint
+          : localizations.expandedHint,
     };
 
     Widget child = ListTileTheme.merge(
@@ -797,14 +780,13 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         visualDensity: visualDensity,
         enableFeedback: widget.enableFeedback,
         contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
-        leading:
-            widget.leading ??
+        leading: widget.leading ??
             _buildLeadingIcon(context, animation, listTileTheme),
         title: widget.title,
         subtitle: widget.subtitle,
         trailing: widget.showTrailingIcon
             ? widget.trailing ??
-                  _buildTrailingIcon(context, animation, listTileTheme)
+                _buildTrailingIcon(context, animation, listTileTheme)
             : null,
         minTileHeight: widget.minTileHeight,
         shape: inkShape,
@@ -839,8 +821,7 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
     BuildContext context,
     Animation<double> animation,
   ) {
-    final bool isShapeProvided =
-        widget.shape != null ||
+    final bool isShapeProvided = widget.shape != null ||
         _expansionTileTheme.shape != null ||
         widget.collapsedShape != null ||
         _expansionTileTheme.collapsedShape != null;
@@ -848,14 +829,12 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
       return null;
     }
 
-    final bool closed =
-        !_tileController.isExpanded &&
+    final bool closed = !_tileController.isExpanded &&
         animation.status == AnimationStatus.dismissed;
     final bool topOnly = !closed;
 
     final double t = _easeOutTween.transform(animation.value);
-    final ShapeBorder border =
-        _borderTween.lerp(t) ??
+    final ShapeBorder border = _borderTween.lerp(t) ??
         const Border(
           top: BorderSide(color: Colors.transparent),
           bottom: BorderSide(color: Colors.transparent),
@@ -955,13 +934,11 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         );
       },
       child: Align(
-        alignment:
-            widget.expandedAlignment ??
+        alignment: widget.expandedAlignment ??
             _expansionTileTheme.expandedAlignment ??
             Alignment.center,
         child: Padding(
-          padding:
-              widget.childrenPadding ??
+          padding: widget.childrenPadding ??
               _expansionTileTheme.childrenPadding ??
               EdgeInsets.zero,
           child: Column(
@@ -984,18 +961,15 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
       _backgroundColorTween.chain(_easeOutTween),
     );
     _border = animation.drive(_borderTween.chain(_easeOutTween));
-    final Color backgroundColor =
-        _backgroundColor.value ??
+    final Color backgroundColor = _backgroundColor.value ??
         _expansionTileTheme.backgroundColor ??
         Colors.transparent;
-    final ShapeBorder expansionTileBorder =
-        _border.value ??
+    final ShapeBorder expansionTileBorder = _border.value ??
         const Border(
           top: BorderSide(color: Colors.transparent),
           bottom: BorderSide(color: Colors.transparent),
         );
-    final Clip clipBehavior =
-        widget.clipBehavior ??
+    final Clip clipBehavior = widget.clipBehavior ??
         _expansionTileTheme.clipBehavior ??
         Clip.antiAlias;
 
@@ -1009,8 +983,7 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
       sliver: SliverMainAxisGroup(slivers: <Widget>[header, body]),
     );
 
-    final bool isShapeProvided =
-        widget.shape != null ||
+    final bool isShapeProvided = widget.shape != null ||
         _expansionTileTheme.shape != null ||
         widget.collapsedShape != null ||
         _expansionTileTheme.collapsedShape != null;
@@ -1046,16 +1019,13 @@ class _SliverExpansionTileState extends State<SliverExpansionTile> {
         reverseCurve: _reverseCurve,
       ),
       maintainState: widget.maintainState,
-
       sliverHeaderBuilder: (context, animation) {
         final bool isDense = _isDenseLayout(theme, listTileTheme);
-        final VisualDensity effectiveVisualDensity =
-            widget.visualDensity ??
+        final VisualDensity effectiveVisualDensity = widget.visualDensity ??
             listTileTheme.visualDensity ??
             theme.listTileTheme.visualDensity ??
             theme.visualDensity;
-        final bool isThreeLine =
-            widget.isThreeLine ??
+        final bool isThreeLine = widget.isThreeLine ??
             listTileTheme.isThreeLine ??
             theme.listTileTheme.isThreeLine ??
             false;
