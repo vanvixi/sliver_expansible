@@ -10,7 +10,7 @@ Sliver expansion primitives for Flutter:
 ## Demo
 
 <p align="center">
-  <img src="screenshots/demo.gif" height="720" alt="Demo" />
+  <img src="https://raw.githubusercontent.com/vanvixi/sliver_expansible/main/screenshots/demo.gif" height="720" alt="Demo" />
 </p>
 
 ## Getting started
