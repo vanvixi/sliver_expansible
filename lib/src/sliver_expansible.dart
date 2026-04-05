@@ -336,7 +336,8 @@ class _SliverExpansibleState extends State<SliverExpansible>
       widget.controller.collapse();
     }
 
-    if (widget.bodyRevealMode == .sliverClipReveal) {
+    if (widget.bodyRevealMode ==
+        SliverExpansibleBodyRevealMode.sliverClipReveal) {
       final factorTween = Tween<double>(begin: 0, end: 1);
       _mainAxisFactor = CurvedAnimation(
         parent: _animationController.drive(factorTween),
@@ -416,11 +417,11 @@ class _SliverExpansibleState extends State<SliverExpansible>
     final shouldRemoveBody = closed && !widget.maintainState;
 
     final Widget result = switch (widget.bodyRevealMode) {
-      .sliverClipReveal => TickerMode(
+      SliverExpansibleBodyRevealMode.sliverClipReveal => TickerMode(
         enabled: !closed,
         child: widget.sliverBodyBuilder(context, _animationController),
       ),
-      .builderControlled => SliverOffstage(
+      SliverExpansibleBodyRevealMode.builderControlled => SliverOffstage(
         offstage: closed,
         sliver: TickerMode(
           enabled: !closed,
@@ -439,11 +440,12 @@ class _SliverExpansibleState extends State<SliverExpansible>
         final factor = _mainAxisFactor;
 
         final Widget body = switch (widget.bodyRevealMode) {
-          .sliverClipReveal when factor != null => _SliverExpansibleBody(
+          SliverExpansibleBodyRevealMode.sliverClipReveal when factor != null =>
+            _SliverExpansibleBody(
             factor: factor,
             sliver: child,
           ),
-          .builderControlled =>
+          SliverExpansibleBodyRevealMode.builderControlled =>
             child ?? const SliverToBoxAdapter(child: SizedBox.shrink()),
           _ => const SliverToBoxAdapter(child: SizedBox.shrink()),
         };

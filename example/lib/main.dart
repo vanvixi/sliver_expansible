@@ -95,10 +95,10 @@ class SliverExpansibleExamplePage extends StatelessWidget {
                 backgroundColor: Colors.lightGreen,
                 collapsedBackgroundColor: Colors.lightGreen,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: .all(Radius.circular(12)),
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
                 collapsedShape: const RoundedRectangleBorder(
-                  borderRadius: .all(Radius.circular(12)),
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
                 children: [
                   for (int i = 0; i < 4; i++)
@@ -144,10 +144,10 @@ class SliverExpansibleTitleCustom extends StatelessWidget {
       collapsedBackgroundColor: color,
       pinnedHeaderColor: color,
       shape: const RoundedRectangleBorder(
-        borderRadius: .all(Radius.circular(12)),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
       collapsedShape: const RoundedRectangleBorder(
-        borderRadius: .all(Radius.circular(12)),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
       children: [
         for (int i = 0; i < itemCount; i++)
