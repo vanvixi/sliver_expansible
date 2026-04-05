@@ -1,3 +1,5 @@
-## 0.0.1
+## 0.q.0
 
-* TODO: Describe initial release.
+- Initial release.
+- Add `SliverExpansible` + `SliverExpansibleController` (expand/collapse a body sliver with animation).
+- Add `SliverExpansionTile` (Material-style sliver expansion tile with optional pinned header and lazy children).
